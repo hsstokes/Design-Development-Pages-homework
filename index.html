@@ -128,6 +128,7 @@ p {
   color: #2e7d32;
 }
 
+/* Lightbox-ready image wrapper */
 .example-image {
   width: 100%;
   height: 220px;
@@ -136,22 +137,113 @@ p {
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  position: relative;
+  cursor: zoom-in;
 }
 
 .example-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.3s ease;
 }
 
+.example-image:hover img {
+  transform: scale(1.03);
+}
+
+.zoom-hint {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(0,0,0,0.55);
+  color: white;
+  font-size: 0.65rem;
+  padding: 3px 7px;
+  border-radius: 4px;
+  pointer-events: none;
+  letter-spacing: 0.03em;
+}
+
+/* Smaller, tidier caption */
 .example-caption {
-  padding: 12px 15px;
+  padding: 8px 12px;
   background: white;
-  font-size: 0.9rem;
+  font-size: 0.72rem;
   text-align: center;
-  color: #666;
+  color: #888;
+  line-height: 1.4;
+  border-top: 1px solid #f0f0f0;
 }
 
+.example-caption em {
+  display: block;
+  font-size: 0.65rem;
+  color: #aaa;
+  margin-top: 2px;
+}
+
+/* ── Lightbox ── */
+.lightbox-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.88);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 20px;
+  cursor: zoom-out;
+}
+
+.lightbox-overlay.active {
+  display: flex;
+}
+
+.lightbox-overlay img {
+  max-width: 90vw;
+  max-height: 80vh;
+  border-radius: 8px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+  object-fit: contain;
+}
+
+.lightbox-caption {
+  color: #ccc;
+  font-size: 0.78rem;
+  margin-top: 14px;
+  text-align: center;
+  font-family: "Space Mono", monospace;
+  max-width: 600px;
+}
+
+.lightbox-caption em {
+  display: block;
+  color: #888;
+  font-size: 0.68rem;
+  margin-top: 4px;
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 18px;
+  right: 24px;
+  color: white;
+  font-size: 2rem;
+  cursor: pointer;
+  line-height: 1;
+  background: none;
+  border: none;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.lightbox-close:hover {
+  opacity: 1;
+}
+
+/* Tasks */
 .task-box {
   background: white;
   border-radius: 10px;
@@ -359,6 +451,13 @@ footer {
 </head>
 <body>
 
+  <!-- Lightbox overlay -->
+  <div class="lightbox-overlay" id="lightbox" onclick="closeLightbox()">
+    <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+    <img id="lightbox-img" src="" alt="">
+    <div class="lightbox-caption" id="lightbox-caption"></div>
+  </div>
+
   <div class="container">
 
     <h1>🔗 Design Development Pages</h1>
@@ -368,144 +467,167 @@ footer {
       <p>Find some pages that need research links. Choose one tutorial to watch and expand as part of developing a design page in class.</p>
     </div>
 
-  <!-- Before and After Examples -->
-  <div class="example-grid">
-    <div class="example-card before">
-      <div class="example-header">❌ Before: No Research Links</div>
-      <div class="example-image">
-        <img src="images/design-dev-before.jpg" alt="Design page without research links">
+    <!-- Before and After Examples -->
+    <div class="example-grid">
+      <div class="example-card before">
+        <div class="example-header">❌ Before: No Research Links</div>
+        <div class="example-image" onclick="openLightbox('images/design-dev-before.jpg', 'Designs on page — but where did the ideas come from?', 'Student work: Loulanky Xia (used with permission). Research links removed for demonstration.')">
+          <img src="images/design-dev-before.jpg" alt="Design page without research links">
+          <span class="zoom-hint">🔍 click to enlarge</span>
+        </div>
+        <div class="example-caption">
+          Designs on page — but where did the ideas come from?
+          <em>Student work: Loulanky Xia (used with permission). Research links removed for demonstration.</em>
+        </div>
       </div>
-      <div class="example-caption">
-        Designs on page — but where did the ideas come from?<br>
-        <em>Student work: Loulanky Xia. Research links removed for demonstration.</em>
+      
+      <div class="example-card after">
+        <div class="example-header">✓ After: Research Links Added</div>
+        <div class="example-image" onclick="openLightbox('images/design-dev-after.jpg', 'Research images added to show where ideas came from.', 'Student work: Loulanky Xia (used with permission).')">
+          <img src="images/design-dev-after.jpg" alt="Design page with research links">
+          <span class="zoom-hint">🔍 click to enlarge</span>
+        </div>
+        <div class="example-caption">
+          Research images added to show where ideas came from.
+          <em>Student work: Loulanky Xia (used with permission).</em>
+        </div>
+      </div>
+    </div>
+
+    <div class="task-box">
+      <div class="task-header">Task 1: Find Your Page</div>
+      <div class="task-content">
+        <p>Look through your portfolio. Find a <strong>design development page</strong> that:</p>
+        <ul>
+          <li>Has your design sketches</li>
+          <li>Is <strong>missing research links</strong> — you cannot see where ideas came from</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="task-box">
+      <div class="task-header">Task 2: Find Your Research Images</div>
+      <div class="task-content">
+        <p>Find <strong>2-4 research images</strong> that inspired your designs:</p>
+        <ul>
+          <li>Look at your research pages or folder</li>
+          <li>Which images inspired the shapes, colours, or textures?</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="task-box">
+      <div class="task-header">Task 3: Scan Your Page</div>
+      <div class="task-content">
+        <p>If your page is on paper, scan it at <strong>300 DPI</strong> and save as JPEG.</p>
+      </div>
+    </div>
+
+    <h2>Task 4: Choose ONE Tutorial</h2>
+    <p>Pick one tutorial. Watch it before class.</p>
+
+    <div class="tutorial-grid">
+      <div class="tutorial-card">
+        <div class="tutorial-card-header pattern">
+          <div class="icon">〰️</div>
+          <h4>Pattern Brushes</h4>
+        </div>
+        <div class="tutorial-card-body">
+          <p>Make lines from your drawings to connect parts of the page.</p>
+        </div>
+        <a href="https://hsstokes.github.io/Pattern-Brushes---Graphic-Elements/" target="_blank" class="tutorial-link">Watch →</a>
+      </div>
+      
+      <div class="tutorial-card">
+        <div class="tutorial-card-header stencil">
+          <div class="icon">✂️</div>
+          <h4>Stencils & Brushes</h4>
+        </div>
+        <div class="tutorial-card-body">
+          <p>Make bold shapes and cut images into textures.</p>
+        </div>
+        <a href="https://hsstokes.github.io/Creating-Stencils---Digital-Brushes/" target="_blank" class="tutorial-link">Watch →</a>
+      </div>
+      
+      <div class="tutorial-card">
+        <div class="tutorial-card-header details">
+          <div class="icon">🔍</div>
+          <h4>Enlarging Details</h4>
+        </div>
+        <div class="tutorial-card-body">
+          <p>Make small details bigger. Use colour to link elements.</p>
+        </div>
+        <a href="https://hsstokes.github.io/Expanding-details-and-artists-link-within-Research-Pages/" target="_blank" class="tutorial-link">Watch →</a>
+      </div>
+    </div>
+
+    <div class="checklist">
+      <h3>Homework Checklist ✓</h3>
+      
+      <div class="checklist-item">
+        <div class="checklist-checkbox" onclick="this.classList.toggle('checked')"></div>
+        <span class="checklist-label">Found a design page missing research links</span>
+      </div>
+      
+      <div class="checklist-item">
+        <div class="checklist-checkbox" onclick="this.classList.toggle('checked')"></div>
+        <span class="checklist-label">Found 2-4 research images</span>
+      </div>
+      
+      <div class="checklist-item">
+        <div class="checklist-checkbox" onclick="this.classList.toggle('checked')"></div>
+        <span class="checklist-label">Scanned page (if on paper)</span>
+      </div>
+      
+      <div class="checklist-item">
+        <div class="checklist-checkbox" onclick="this.classList.toggle('checked')"></div>
+        <span class="checklist-label">Chose ONE tutorial</span>
+      </div>
+      
+      <div class="checklist-item">
+        <div class="checklist-checkbox" onclick="this.classList.toggle('checked')"></div>
+        <span class="checklist-label">Watched the tutorial</span>
       </div>
     </div>
     
-    <div class="example-card after">
-      <div class="example-header">✓ After: Research Links Added</div>
-      <div class="example-image">
-        <img src="images/design-dev-after.jpg" alt="Design page with research links">
-      </div>
-      <div class="example-caption">
-        Research images added to show where ideas came from.<br>
-        <em>Student work: Loulanky Xia.</em>
-      </div>
-    </div>
-  </div>
-
-  <div class="task-box">
-    <div class="task-header">Task 1: Find Your Page</div>
-    <div class="task-content">
-      <p>Look through your portfolio. Find a <strong>design development page</strong> that:</p>
+    <div class="bring-box">
+      <h3>📚 Bring to Class</h3>
       <ul>
-        <li>Has your design sketches</li>
-        <li>Is <strong>missing research links</strong> — you cannot see where ideas came from</li>
+        <li>📄 Your design page (scanned or digital)</li>
+        <li>📷 Your research images/collages (2-4 images)</li>
+        <li>🎓 Knowledge of your chosen tutorial</li>
       </ul>
     </div>
+
+    <footer>
+      © 2025 Fashion Design Term 3 — Design Development Homework<br>
+      <em>Student example: Loulanky Xia, used with permission for educational purposes.</em>
+    </footer>
   </div>
 
-  <div class="task-box">
-    <div class="task-header">Task 2: Find Your Research Images</div>
-    <div class="task-content">
-      <p>Find <strong>2-4 research images</strong> that inspired your designs:</p>
-      <ul>
-        <li>Look at your research pages or folder</li>
-        <li>Which images inspired the shapes, colours, or textures?</li>
-      </ul>
-    </div>
-  </div>
+  <button class="print-button" onclick="window.print()">🖨️</button>
 
-  <div class="task-box">
-    <div class="task-header">Task 3: Scan Your Page</div>
-    <div class="task-content">
-      <p>If your page is on paper, scan it at <strong>300 DPI</strong> and save as JPEG.</p>
-    </div>
-  </div>
+  <script>
+    function openLightbox(src, caption, credit) {
+      const overlay = document.getElementById('lightbox');
+      const img = document.getElementById('lightbox-img');
+      const cap = document.getElementById('lightbox-caption');
+      img.src = src;
+      img.alt = caption;
+      cap.innerHTML = caption + (credit ? '<em>' + credit + '</em>' : '');
+      overlay.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
 
-  <h2>Task 4: Choose ONE Tutorial</h2>
-  <p>Pick one tutorial. Watch it before class.</p>
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.remove('active');
+      document.body.style.overflow = '';
+    }
 
-  <div class="tutorial-grid">
-    <div class="tutorial-card">
-      <div class="tutorial-card-header pattern">
-        <div class="icon">〰️</div>
-        <h4>Pattern Brushes</h4>
-      </div>
-      <div class="tutorial-card-body">
-        <p>Make lines from your drawings to connect parts of the page.</p>
-      </div>
-      <a href="https://hsstokes.github.io/Pattern-Brushes---Graphic-Elements/" target="_blank" class="tutorial-link">Watch →</a>
-    </div>
-    
-    <div class="tutorial-card">
-      <div class="tutorial-card-header stencil">
-        <div class="icon">✂️</div>
-        <h4>Stencils & Brushes</h4>
-      </div>
-      <div class="tutorial-card-body">
-        <p>Make bold shapes and cut images into textures.</p>
-      </div>
-      <a href="https://hsstokes.github.io/Creating-Stencils---Digital-Brushes/" target="_blank" class="tutorial-link">Watch →</a>
-    </div>
-    
-    <div class="tutorial-card">
-      <div class="tutorial-card-header details">
-        <div class="icon">🔍</div>
-        <h4>Enlarging Details</h4>
-      </div>
-      <div class="tutorial-card-body">
-        <p>Make small details bigger. Use colour to link elements.</p>
-      </div>
-      <a href="https://hsstokes.github.io/Expanding-details-and-artists-link-within-Research-Pages/" target="_blank" class="tutorial-link">Watch →</a>
-    </div>
-  </div>
-
-  <div class="checklist">
-    <h3>Homework Checklist ✓</h3>
-    
-    <div class="checklist-item">
-      <div class="checklist-checkbox" onclick="this.classList.toggle('checked')"></div>
-      <span class="checklist-label">Found a design page missing research links</span>
-    </div>
-    
-    <div class="checklist-item">
-      <div class="checklist-checkbox" onclick="this.classList.toggle('checked')"></div>
-      <span class="checklist-label">Found 2-4 research images</span>
-    </div>
-    
-    <div class="checklist-item">
-      <div class="checklist-checkbox" onclick="this.classList.toggle('checked')"></div>
-      <span class="checklist-label">Scanned page (if on paper)</span>
-    </div>
-    
-    <div class="checklist-item">
-      <div class="checklist-checkbox" onclick="this.classList.toggle('checked')"></div>
-      <span class="checklist-label">Chose ONE tutorial</span>
-    </div>
-    
-    <div class="checklist-item">
-      <div class="checklist-checkbox" onclick="this.classList.toggle('checked')"></div>
-      <span class="checklist-label">Watched the tutorial</span>
-    </div>
-  </div>
-  
-  <div class="bring-box">
-    <h3>📚 Bring to Class</h3>
-    <ul>
-      <li>📄 Your design page (scanned or digital)</li>
-      <li>📷 Your research images (2-4 images)</li>
-      <li>🎓 Knowledge of your chosen tutorial</li>
-    </ul>
-  </div>
-
-  <footer>
-    © 2025 Fashion Design Term 3 — Design Development Homework<br>
-    <em>Student example: Loulanky Xia.</em>
-  </footer>
-</div>
-
-
-<button class="print-button" onclick="window.print()">🖨️</button>
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeLightbox();
+    });
+  </script>
 
 </body>
 </html>
